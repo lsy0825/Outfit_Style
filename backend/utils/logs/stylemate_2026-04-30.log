@@ -1,0 +1,73 @@
+2026-04-30 18:34:53 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-04-30 18:34:54 - main - INFO - ✅ Agent 初始化完成
+2026-04-30 18:35:21 - main - INFO - 👋 StyleMate 后端服务关闭
+2026-04-30 18:35:24 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-04-30 18:35:25 - main - INFO - ✅ Agent 初始化完成
+2026-04-30 18:35:34 - main - INFO - 👋 StyleMate 后端服务关闭
+2026-04-30 18:35:36 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-04-30 18:35:38 - main - INFO - ✅ Agent 初始化完成
+2026-04-30 18:35:49 - main - INFO - 👋 StyleMate 后端服务关闭
+2026-04-30 18:35:51 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-04-30 18:35:53 - main - INFO - ✅ Agent 初始化完成
+2026-04-30 18:35:55 - main - INFO - 👋 StyleMate 后端服务关闭
+2026-04-30 18:35:58 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-04-30 18:35:59 - main - INFO - ✅ Agent 初始化完成
+2026-04-30 18:36:00 - __main__ - INFO - 测试日志输出
+2026-04-30 18:36:00 - __main__ - INFO - 如果看到这条消息，说明日志配置成功
+2026-04-30 18:36:06 - tools.weather_tool - INFO - [缓存未命中] 天气查询 - 城市: 上海, 日期: 2026-04-30，正在调用 API...
+2026-04-30 18:36:08 - httpx - INFO - HTTP Request: GET https://api.open-meteo.com/v1/forecast?latitude=31.2304&longitude=121.4737&current=temperature_2m&current=relative_humidity_2m&current=apparent_temperature&current=precipitation&current=weather_code&current=wind_speed_10m&current=wind_direction_10m&current=surface_pressure&timezone=auto&forecast_days=1 "HTTP/1.1 200 OK"
+2026-04-30 18:36:08 - tools.weather_tool - INFO - [缓存已存储] 天气查询 - 城市: 上海, 日期: 2026-04-30
+2026-04-30 18:36:08 - tools.weather_tool - INFO - [缓存命中] 天气查询 - 城市: 上海, 日期: 2026-04-30
+2026-04-30 18:36:08 - tools.weather_tool - INFO - [缓存未命中] 天气查询 - 城市: 上海, 日期: 2026-05-01，正在调用 API...
+2026-04-30 18:36:09 - httpx - INFO - HTTP Request: GET https://api.open-meteo.com/v1/forecast?latitude=31.2304&longitude=121.4737&current=temperature_2m&current=relative_humidity_2m&current=apparent_temperature&current=precipitation&current=weather_code&current=wind_speed_10m&current=wind_direction_10m&current=surface_pressure&timezone=auto&forecast_days=1 "HTTP/1.1 200 OK"
+2026-04-30 18:36:09 - tools.weather_tool - INFO - [缓存已存储] 天气查询 - 城市: 上海, 日期: 2026-05-01
+2026-04-30 18:36:09 - tools.sunset_tool - INFO - [缓存未命中] 日落查询 - 城市: 上海, 日期: 2026-04-30，正在调用 API...
+2026-04-30 18:36:11 - httpx - INFO - HTTP Request: GET https://api.open-meteo.com/v1/forecast?latitude=31.2304&longitude=121.4737&daily=sunrise&daily=sunset&timezone=auto&forecast_days=2 "HTTP/1.1 200 OK"
+2026-04-30 18:36:11 - tools.sunset_tool - INFO - [缓存已存储] 日落查询 - 城市: 上海, 日期: 2026-04-30
+2026-04-30 18:36:11 - tools.sunset_tool - INFO - [缓存命中] 日落查询 - 城市: 上海, 日期: 2026-04-30
+2026-04-30 18:36:11 - tools.sunset_tool - INFO - [缓存未命中] 日落查询 - 城市: 上海, 日期: 2026-05-01，正在调用 API...
+2026-04-30 18:36:12 - httpx - INFO - HTTP Request: GET https://api.open-meteo.com/v1/forecast?latitude=31.2304&longitude=121.4737&daily=sunrise&daily=sunset&timezone=auto&forecast_days=2 "HTTP/1.1 200 OK"
+2026-04-30 18:36:12 - tools.sunset_tool - INFO - [缓存已存储] 日落查询 - 城市: 上海, 日期: 2026-05-01
+2026-04-30 18:36:12 - tools.weather_tool - INFO - [缓存命中] 天气查询 - 城市: 上海, 日期: 2026-04-30
+2026-04-30 18:36:12 - tools.weather_tool - INFO - [缓存未命中] 天气查询 - 城市: 北京, 日期: 2026-04-30，正在调用 API...
+2026-04-30 18:36:13 - httpx - INFO - HTTP Request: GET https://api.open-meteo.com/v1/forecast?latitude=39.9042&longitude=116.4074&current=temperature_2m&current=relative_humidity_2m&current=apparent_temperature&current=precipitation&current=weather_code&current=wind_speed_10m&current=wind_direction_10m&current=surface_pressure&timezone=auto&forecast_days=1 "HTTP/1.1 200 OK"
+2026-04-30 18:36:13 - tools.weather_tool - INFO - [缓存已存储] 天气查询 - 城市: 北京, 日期: 2026-04-30
+2026-04-30 18:36:28 - main - INFO - 👋 StyleMate 后端服务关闭
+2026-04-30 18:36:31 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-04-30 18:36:32 - main - INFO - ✅ Agent 初始化完成
+2026-04-30 18:36:40 - main - INFO - 👋 StyleMate 后端服务关闭
+2026-04-30 18:36:43 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-04-30 18:36:44 - main - INFO - ✅ Agent 初始化完成
+2026-04-30 18:36:44 - __main__ - INFO - 这是 INFO 日志 ✅ 你应该能看到这条
+2026-04-30 18:36:44 - __main__ - WARNING - 这是 WARNING 日志 ⚠️
+2026-04-30 18:36:44 - __main__ - ERROR - 这是 ERROR 日志 ❌
+2026-04-30 18:36:45 - tools.weather_tool - INFO - [缓存未命中] 天气查询 - 城市: 上海, 日期: 2026-04-30，正在调用 API...
+2026-04-30 18:36:47 - httpx - INFO - HTTP Request: GET https://api.open-meteo.com/v1/forecast?latitude=31.2304&longitude=121.4737&current=temperature_2m&current=relative_humidity_2m&current=apparent_temperature&current=precipitation&current=weather_code&current=wind_speed_10m&current=wind_direction_10m&current=surface_pressure&timezone=auto&forecast_days=1 "HTTP/1.1 200 OK"
+2026-04-30 18:36:47 - tools.weather_tool - INFO - [缓存已存储] 天气查询 - 城市: 上海, 日期: 2026-04-30
+2026-04-30 18:36:47 - tools.weather_tool - INFO - [缓存命中] 天气查询 - 城市: 上海, 日期: 2026-04-30
+2026-04-30 18:37:05 - __main__ - INFO - 这是 INFO 日志 ✅ 你应该能看到这条
+2026-04-30 18:37:05 - __main__ - WARNING - 这是 WARNING 日志 ⚠️
+2026-04-30 18:37:05 - __main__ - ERROR - 这是 ERROR 日志 ❌
+2026-04-30 18:37:05 - tools.weather_tool - INFO - [缓存未命中] 天气查询 - 城市: 上海, 日期: 2026-04-30，正在调用 API...
+2026-04-30 18:37:07 - httpx - INFO - HTTP Request: GET https://api.open-meteo.com/v1/forecast?latitude=31.2304&longitude=121.4737&current=temperature_2m&current=relative_humidity_2m&current=apparent_temperature&current=precipitation&current=weather_code&current=wind_speed_10m&current=wind_direction_10m&current=surface_pressure&timezone=auto&forecast_days=1 "HTTP/1.1 200 OK"
+2026-04-30 18:37:07 - tools.weather_tool - INFO - [缓存已存储] 天气查询 - 城市: 上海, 日期: 2026-04-30
+2026-04-30 18:37:07 - tools.weather_tool - INFO - [缓存命中] 天气查询 - 城市: 上海, 日期: 2026-04-30
+2026-04-30 18:37:48 - main - INFO - 👋 StyleMate 后端服务关闭
+2026-04-30 18:37:51 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-04-30 18:37:52 - main - INFO - ✅ Agent 初始化完成
+2026-04-30 18:38:11 - main - INFO - 👋 StyleMate 后端服务关闭
+2026-04-30 18:38:14 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\utils\logs\stylemate_2026-04-30.log
+2026-04-30 18:38:14 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\utils\logs\stylemate_2026-04-30.log
+2026-04-30 18:38:14 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\utils\logs\stylemate_2026-04-30.log
+2026-04-30 18:38:14 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-04-30 18:38:15 - main - INFO - ✅ Agent 初始化完成
+2026-04-30 18:39:19 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\utils\logs\stylemate_2026-04-30.log
+2026-04-30 18:39:19 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\utils\logs\stylemate_2026-04-30.log
+2026-04-30 18:39:19 - __main__ - INFO - 这是 INFO 日志 ✅ 你应该能看到这条
+2026-04-30 18:39:19 - __main__ - WARNING - 这是 WARNING 日志 ⚠️
+2026-04-30 18:39:19 - __main__ - ERROR - 这是 ERROR 日志 ❌
+2026-04-30 18:39:20 - tools.weather_tool - INFO - [缓存未命中] 天气查询 - 城市: 上海, 日期: 2026-04-30，正在调用 API...
+2026-04-30 18:39:21 - httpx - INFO - HTTP Request: GET https://api.open-meteo.com/v1/forecast?latitude=31.2304&longitude=121.4737&current=temperature_2m&current=relative_humidity_2m&current=apparent_temperature&current=precipitation&current=weather_code&current=wind_speed_10m&current=wind_direction_10m&current=surface_pressure&timezone=auto&forecast_days=1 "HTTP/1.1 200 OK"
+2026-04-30 18:39:21 - tools.weather_tool - INFO - [缓存已存储] 天气查询 - 城市: 上海, 日期: 2026-04-30
+2026-04-30 18:39:21 - tools.weather_tool - INFO - [缓存命中] 天气查询 - 城市: 上海, 日期: 2026-04-30
+2026-04-30 18:39:42 - main - INFO - 👋 StyleMate 后端服务关闭
