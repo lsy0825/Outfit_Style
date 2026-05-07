@@ -1,0 +1,46 @@
+2026-05-07 14:32:46 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\logs\stylemate_2026-05-07.log
+2026-05-07 14:32:47 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\logs\stylemate_2026-05-07.log
+2026-05-07 14:32:47 - __main__ - INFO - 🚀 启动 StyleMate 后端服务...
+2026-05-07 14:32:47 - __main__ - INFO - 📝 日志将输出到终端和 logs/ 目录
+2026-05-07 14:32:47 - __main__ - INFO - 🔄 已禁用 reload 模式，避免日志文件触发重新加载
+2026-05-07 14:32:47 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\logs\stylemate_2026-05-07.log
+2026-05-07 14:32:47 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-05-07 14:32:47 - main - INFO - ✅ Agent 初始化完成
+2026-05-07 14:32:47 - main - INFO - 📚 正在初始化 RAG 知识库...
+2026-05-07 14:32:49 - main - INFO - ✅ RAG 知识库初始化完成，已加载 10 个文档块
+2026-05-07 14:35:41 - httpx - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-07 14:35:42 - tools.weather_tool - INFO - [缓存未命中] 天气查询 - 城市: 深圳, 日期: 2026-05-07，正在调用 API...
+2026-05-07 14:35:43 - httpx - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-07 14:35:43 - tools.weather_tool - INFO - [缓存未命中] 天气查询 - 城市: 深圳, 日期: 2026-05-07，正在调用 API...
+2026-05-07 14:35:44 - httpx - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-07 15:07:01 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\logs\stylemate_2026-05-07.log
+2026-05-07 15:07:02 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\logs\stylemate_2026-05-07.log
+2026-05-07 15:07:02 - __main__ - INFO - 🚀 启动 StyleMate 后端服务...
+2026-05-07 15:07:02 - __main__ - INFO - 📝 日志将输出到终端和 logs/ 目录
+2026-05-07 15:07:02 - __main__ - INFO - 🔄 已禁用 reload 模式，避免日志文件触发重新加载
+2026-05-07 15:07:02 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\logs\stylemate_2026-05-07.log
+2026-05-07 15:07:02 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-05-07 15:07:03 - main - INFO - ✅ Agent 初始化完成
+2026-05-07 15:07:03 - main - INFO - 📚 正在初始化 RAG 知识库...
+2026-05-07 15:07:05 - main - INFO - ✅ RAG 知识库初始化完成，已加载 10 个文档块
+2026-05-07 15:08:01 - httpx - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-07 15:08:03 - tools.weather_tool - INFO - [缓存未命中] 天气查询 - 城市: 深圳, 日期: 2026-05-07，正在调用 API...
+2026-05-07 15:08:04 - httpx - INFO - HTTP Request: GET https://api.open-meteo.com/v1/forecast?latitude=22.5431&longitude=114.0579&current=temperature_2m&current=relative_humidity_2m&current=apparent_temperature&current=precipitation&current=weather_code&current=wind_speed_10m&current=wind_direction_10m&current=surface_pressure&timezone=auto&forecast_days=1 "HTTP/1.1 200 OK"
+2026-05-07 15:08:04 - tools.weather_tool - INFO - [缓存已存储] 天气查询 - 城市: 深圳, 日期: 2026-05-07
+2026-05-07 15:08:05 - httpx - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-07 15:45:50 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\logs\stylemate_2026-05-07.log
+2026-05-07 15:45:51 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\logs\stylemate_2026-05-07.log
+2026-05-07 15:45:51 - __main__ - INFO - 🚀 启动 StyleMate 后端服务...
+2026-05-07 15:45:51 - __main__ - INFO - 📝 日志将输出到终端和 logs/ 目录
+2026-05-07 15:45:51 - __main__ - INFO - 🔄 已禁用 reload 模式，避免日志文件触发重新加载
+2026-05-07 15:45:51 - root - INFO - ✅ 日志文件已创建: D:\AgentProjects\Outfit_Style\backend\logs\stylemate_2026-05-07.log
+2026-05-07 15:45:51 - main - INFO - 🚀 StyleMate 后端服务启动中...
+2026-05-07 15:45:52 - main - INFO - ✅ Agent 初始化完成
+2026-05-07 15:45:52 - main - INFO - 📚 正在初始化 RAG 知识库...
+2026-05-07 15:45:53 - main - INFO - ✅ RAG 知识库初始化完成，已加载 10 个文档块
+2026-05-07 15:48:19 - httpx - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-07 15:48:23 - httpx - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-07 15:48:24 - tools.weather_tool - INFO - [缓存未命中] 天气查询 - 城市: 深圳, 日期: 2026-05-07，正在调用 API...
+2026-05-07 15:48:25 - httpx - INFO - HTTP Request: GET https://api.open-meteo.com/v1/forecast?latitude=22.5431&longitude=114.0579&current=temperature_2m&current=relative_humidity_2m&current=apparent_temperature&current=precipitation&current=weather_code&current=wind_speed_10m&current=wind_direction_10m&current=surface_pressure&timezone=auto&forecast_days=1 "HTTP/1.1 200 OK"
+2026-05-07 15:48:25 - tools.weather_tool - INFO - [缓存已存储] 天气查询 - 城市: 深圳, 日期: 2026-05-07
+2026-05-07 15:48:26 - httpx - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"

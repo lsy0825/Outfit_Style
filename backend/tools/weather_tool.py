@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 # 导入地理编码工具
-from tools.geocoding_tool import geocode_city
+from tools.geocoding_tool import _geocode_city_impl
 # 导入缓存管理器和日志
 from utils.cache import CacheManager
 from utils.logger import get_logger
@@ -97,16 +97,12 @@ def get_weather(city: str, date: str = "today", latitude: float = None, longitud
 
         # 如果没有提供经纬度，先查询城市坐标
         if latitude is None or longitude is None:
-            geo_result_str = geocode_city(city)
-            try:
-                geo_data = json.loads(geo_result_str)
-                if "error" not in geo_data:
-                    latitude = geo_data.get("latitude")
-                    longitude = geo_data.get("longitude")
-                else:
-                    return f"无法找到城市「{city}」，请检查城市名称是否正确。"
-            except Exception:
-                return f"查询城市「{city}」坐标失败，请检查城市名称。"
+            geo_result = _geocode_city_impl(city)
+            if "error" not in geo_result:
+                latitude = geo_result.get("latitude")
+                longitude = geo_result.get("longitude")
+            else:
+                return f"无法找到城市「{city}」，请检查城市名称是否正确。"
 
         if latitude is None or longitude is None:
             return f"无法获取城市「{city}」的坐标信息。"

@@ -60,16 +60,15 @@ def _contains_chinese(text: str) -> bool:
     return any('\u4e00' <= ch <= '\u9fff' for ch in text)
 
 
-@tool
-def geocode_city(city: str) -> str:
+def _geocode_city_impl(city: str) -> dict:
     """
-    将城市名称转换为经纬度坐标（使用 Open-Meteo 免费地理编码 API）
+    地理编码核心实现（纯函数，可被其他模块调用）
     
     Args:
         city: 城市名称（支持中文、英文等多种语言）
     
     Returns:
-        包含经纬度信息的 JSON 字符串
+        包含经纬度信息的字典
     """
     try:
         # 优先使用内置坐标表（对中国城市准确率更高）
@@ -83,7 +82,7 @@ def geocode_city(city: str) -> str:
                 "country": "中国",
                 "data_source": "内置坐标库（中国主要城市）"
             }
-            return json.dumps(result, ensure_ascii=False, indent=2)
+            return result
 
         # 使用 Open-Meteo Geocoding API（免费，无需 API Key）
         url = "https://geocoding-api.open-meteo.com/v1/search"
@@ -125,7 +124,7 @@ def geocode_city(city: str) -> str:
                     "population": r.get("population"),
                     "data_source": "Open-Meteo Geocoding API (免费)"
                 }
-                return json.dumps(result, ensure_ascii=False, indent=2)
+                return result
             else:
                 # 回退：尝试用英文再查一次
                 params2 = {
@@ -149,28 +148,43 @@ def geocode_city(city: str) -> str:
                             "admin1": r.get("admin1", ""),
                             "data_source": "Open-Meteo Geocoding API (英文回退)"
                         }
-                        return json.dumps(result, ensure_ascii=False, indent=2)
+                        return result
 
-                return json.dumps({
+                return {
                     "error": True,
                     "message": f"未找到城市「{city}」，请检查名称是否正确，或尝试使用英文名称。"
-                }, ensure_ascii=False)
+                }
         else:
-            return json.dumps({
+            return {
                 "error": True,
                 "message": f"地理编码查询失败: HTTP {response.status_code}"
-            }, ensure_ascii=False)
+            }
 
     except httpx.TimeoutException:
-        return json.dumps({
+        return {
             "error": True,
             "message": "地理编码查询超时，请检查网络连接后重试。"
-        }, ensure_ascii=False)
+        }
     except Exception as e:
-        return json.dumps({
+        return {
             "error": True,
             "message": f"地理编码时出错: {str(e)}"
-        }, ensure_ascii=False)
+        }
+
+
+@tool
+def geocode_city(city: str) -> str:
+    """
+    将城市名称转换为经纬度坐标（使用 Open-Meteo 免费地理编码 API）
+    
+    Args:
+        city: 城市名称（支持中文、英文等多种语言）
+    
+    Returns:
+        包含经纬度信息的 JSON 字符串
+    """
+    result = _geocode_city_impl(city)
+    return json.dumps(result, ensure_ascii=False, indent=2)
 
 
 @tool

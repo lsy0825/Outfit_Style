@@ -3,8 +3,54 @@
 使用 Pydantic 定义结构化输出
 """
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict
 from enum import Enum
+
+
+class UserFashionProfile(BaseModel):
+    """用户穿搭画像"""
+    
+    user_id: str = Field(description="用户唯一标识")
+    
+    # 基础信息
+    gender: str = Field(default="", description="性别：男/女/其他")
+    age_range: str = Field(default="", description="年龄范围：18-25/26-35/36-45/46-55/55+")
+    height: str = Field(default="", description="身高，如：165cm")
+    weight: str = Field(default="", description="体重，如：55kg")
+    
+    # 穿搭相关
+    preferred_cities: List[str] = Field(default_factory=list, description="常用城市（用于天气穿搭）")
+    body_shape: str = Field(default="", description="身材类型：梨形/苹果型/沙漏型/长方形/倒三角")
+    preferred_styles: List[str] = Field(default_factory=list, description="风格偏好：日系/简约/轻熟/运动等")
+    color_preferences: List[str] = Field(default_factory=list, description="喜欢的色系")
+    color_dislikes: List[str] = Field(default_factory=list, description="回避的色系")
+    
+    # 尺码信息（设计为动态覆盖）
+    size_info: Dict[str, str] = Field(default_factory=dict, description="尺码信息，如 {'上衣': 'M', '裤子': '28码', '鞋子': '38'}")
+    
+    # 场合偏好
+    workplace_dress_code: str = Field(default="自由", description="办公着装要求：商务/商务休闲/自由")
+    casual_preferences: str = Field(default="", description="日常偏好描述")
+    
+    # 特殊需求
+    sensitive_to_cold: bool = Field(default=False, description="是否怕冷")
+    sensitive_to_heat: bool = Field(default=False, description="是否怕热")
+    material_preferences: List[str] = Field(default_factory=list, description="材质偏好：棉/羊毛/真丝等")
+    avoid_items: List[str] = Field(default_factory=list, description="不喜欢的单品：高领/紧身裤等")
+    
+    # 其他偏好
+    budget_range: str = Field(default="", description="预算范围：低/中/高/不限")
+    favorite_brands: List[str] = Field(default_factory=list, description="喜欢的品牌")
+    dressing_skill: str = Field(default="", description="穿搭技巧水平：新手/进阶/高手")
+    
+    def to_dict(self) -> dict:
+        """转换为字典用于存储"""
+        return self.model_dump(exclude_none=True)
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "UserFashionProfile":
+        """从字典创建对象"""
+        return cls(**data)
 
 
 class Occasion(str, Enum):

@@ -28,10 +28,25 @@ async def lifespan(app: FastAPI):
     
     # 启动时初始化
     logger.info("🚀 StyleMate 后端服务启动中...")
+    
+    # 初始化 Agent
     agent = StyleMateAgent()
     await agent.initialize()
     set_agent(agent)
     logger.info("✅ Agent 初始化完成")
+    
+    # 初始化 RAG 知识库（延迟初始化，避免阻塞启动）
+    logger.info("📚 正在初始化 RAG 知识库...")
+    try:
+        from rag.retriever_tool import setup_knowledge_base
+        docx_path = r"C:\Users\12629\Desktop\穿搭核心原则.docx"
+        result = setup_knowledge_base(docx_path)
+        if result["success"]:
+            logger.info(f"✅ RAG 知识库初始化完成，已加载 {result['document_count']} 个文档块")
+        else:
+            logger.warning(f"⚠️ RAG 知识库初始化失败：{result.get('error', '未知错误')}")
+    except Exception as e:
+        logger.warning(f"⚠️ RAG 知识库初始化失败：{str(e)}")
     
     yield
     

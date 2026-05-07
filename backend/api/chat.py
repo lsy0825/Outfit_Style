@@ -18,6 +18,7 @@ class ChatMessage(BaseModel):
     """聊天请求体"""
     message: str
     session_id: Optional[str] = "default"
+    user_id: Optional[str] = "default_user"
     stream: Optional[bool] = True
 
 
@@ -36,8 +37,8 @@ async def chat_stream(request: ChatMessage):
         """生成 SSE 数据流"""
         try:
             # Agent 自己会发送 start 事件，这里不再重复发送
-            # 流式调用 Agent 进行对话
-            async for chunk in agent.chat_stream(request.message, request.session_id):
+            # 流式调用 Agent 进行对话（支持 user_id 参数用于偏好存储）
+            async for chunk in agent.chat_stream(request.message, request.session_id, request.user_id):
                 yield chunk
                 # 强制刷新输出缓冲区
                 sys.stdout.flush()
@@ -74,12 +75,44 @@ async def chat(request: ChatMessage):
     agent = get_agent()
     
     try:
-        result = agent.chat(request.message, request.session_id)
+        result = agent.chat(request.message, request.session_id, request.user_id)
         return {
             "session_id": request.session_id,
+            "user_id": request.user_id,
             "message": result,
-            "status": "success"
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/user/profile")
+async def get_user_profile(user_id: str):
+    """
+    获取用户画像
+    """
+    agent = get_agent()
+    
+    try:
+        profile = agent.get_user_profile(user_id)
+        if profile:
+            return profile.model_dump()
+        return {"message": "用户画像不存在"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/user/profile")
+async def update_user_profile(user_id: str, profile_data: dict):
+    """
+    更新用户画像
+    """
+    agent = get_agent()
+    
+    try:
+        updated_profile = agent.update_user_profile(user_id, profile_data)
+        if updated_profile:
+            return updated_profile.model_dump()
+        return {"message": "更新失败"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
