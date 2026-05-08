@@ -1,21 +1,18 @@
 """
 StyleMate Agent - 穿搭推荐核心 Agent
-使用 LangChain + qwen3-max 实现，支持真正逐 token 流式输出
+使用 LangChain + qwen3-max 实现
 
-关键优化：
-- Agent 工具调用阶段：立即推送「正在查询天气...」给前端，避免空白等待
-- LLM 流式输出阶段：逐 token 推送，实现打字机效果
+关键功能：
+- 非流式对话接口，返回文本和图片
+- 文生图功能（使用 wanx-v1）
 - 用户偏好存储：使用 SQLite 实现跨会话复用
 """
-from typing import AsyncGenerator, List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional
 from langchain_openai import ChatOpenAI
 from langchain_classic.agents import create_tool_calling_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
 import json
-import re
-import asyncio
+import requests
 
 from tools.weather_tool import get_weather
 from tools.sunset_tool import get_sunset
@@ -41,13 +38,13 @@ class StyleMateAgent:
 
     async def initialize(self):
         """初始化 Agent"""
-        # 初始化 LLM（streaming=True 才能逐 token 输出）
+        # 初始化 LLM
         self.llm = ChatOpenAI(
             model="qwen3-max",
             api_key="sk-9ab6aa9d33cb4596813f1caeeede0903",
             base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
             temperature=0.7,
-            streaming=True
+            streaming=False
         )
 
         # 定义工具
@@ -165,7 +162,6 @@ class StyleMateAgent:
             user_input: 用户输入文本
             user_id: 用户唯一标识
         """
-        # 构建提取偏好的提示词
         extract_prompt = f"""
 你是一个用户偏好提取助手。请从以下用户输入中提取结构化的穿搭偏好信息。
 
@@ -291,100 +287,174 @@ class StyleMateAgent:
         if updates:
             self.user_profile_store.update_profile(user_id, updates)
 
-    async def chat_stream(self, user_input: str, session_id: str = "default", user_id: str = "default_user") -> AsyncGenerator[str, None]:
+    def _generate_images(self, prompt: str, num_images: int = 3) -> List[str]:
         """
-        逐 token 流式对话接口
-
-        使用 AgentExecutor.astream 统一处理所有请求，让 Agent 自己决定是否调用工具。
-        无论是否需要工具，都保持一致的流式输出体验。
+        使用 wanx-v1 文生图模型生成图片
         
         Args:
-            user_input: 用户输入
-            session_id: 会话ID
-            user_id: 用户ID（用于偏好存储）
+            prompt: 图片描述提示词
+            num_images: 生成图片数量
+            
+        Returns:
+            图片 URL 列表
         """
         try:
-            # 从输入中提取并更新用户偏好
-            self._extract_preferences_from_input(user_input, user_id)
+            import dashscope
+            from dashscope import ImageSynthesis
+            import os
+            import uuid
             
-            # 获取对话历史
-            history = SESSION_HISTORY.get(session_id, [])
-            history_str = ""
-            if history:
-                for msg in history[-6:]:
-                    role = msg.get("role", "human")
-                    content = msg.get("content", "")
-                    if role == "human":
-                        history_str += f"用户：{content}\n"
-                    else:
-                        history_str += f"助手：{content}\n"
-
-            full_input = f"{history_str}用户：{user_input}" if history_str else user_input
-            print(f"full_input: {full_input}")
+            dashscope.api_key = "sk-9ab6aa9d33cb4596813f1caeeede0903"
             
-            # 获取用户偏好提示词
-            user_profile_prompt = self._build_user_profile_prompt(user_id)
-            print(f"user_profile: {user_profile_prompt}")
+            # 创建静态图片目录
+            static_dir = os.path.join(os.path.dirname(__file__), '..', 'static', 'images')
+            os.makedirs(static_dir, exist_ok=True)
             
-            full_output_parts = []
-            got_output = False
-
-            # 使用 AgentExecutor.astream 统一处理所有请求
-            # Agent 会自动决定是否调用工具
-            async for chunk in self.agent_executor.astream(
-                {"input": full_input, "user_profile": user_profile_prompt},
-                config={"configurable": {"session_id": session_id, "user_id": user_id}}
-            ):
-                if isinstance(chunk, dict):
-                    # LLM 输出阶段：逐 token 推送
-                    if "output" in chunk:
-                        token = chunk["output"]
-                        if token:
-                            got_output = True
-                            full_output_parts.append(token)
-                            # 逐字符发送，确保流式效果
-                            for char in token:
-                                data = json.dumps(
-                                    {"type": "text_chunk", "data": char},
-                                    ensure_ascii=False
-                                )
-                                yield f"data: {data}\n\n"
-                                await asyncio.sleep(0.02)
-
-            # 如果 astream 没有流式输出（某些情况下降级）
-            if not got_output:
-                result = await self.agent_executor.ainvoke(
-                    {"input": full_input, "user_profile": user_profile_prompt}
+            image_urls = []
+            
+            for i in range(num_images):
+                print(f"文生图请求 - 模型: wanx-v1")
+                print(f"文生图请求 - 提示词长度: {len(prompt)}")
+                print(f"文生图请求 - 提示词预览: {prompt[:100]}...")
+                
+                # 设置轮询参数，减少日志输出
+                result = ImageSynthesis.call(
+                    model="wanx-v1",
+                    prompt=prompt,
+                    size="768*1152",
+                    seed=i + 42,
+                    # 设置轮询参数
+                    max_wait_time=120,  # 最大等待时间
+                    interval=5  # 轮询间隔（秒）
                 )
-                output = result.get("output", "")
-                full_output_parts = [output]
-                # 逐字符输出（降级方案）
-                for char in output:
-                    data = json.dumps(
-                        {"type": "text_chunk", "data": char},
-                        ensure_ascii=False
-                    )
-                    yield f"data: {data}\n\n"
-                    await asyncio.sleep(0.02)
-
-            # 保存对话历史
-            full_output = "".join(full_output_parts)
-            if session_id not in SESSION_HISTORY:
-                SESSION_HISTORY[session_id] = []
-            SESSION_HISTORY[session_id].append({"role": "human", "content": user_input})
-            SESSION_HISTORY[session_id].append({"role": "assistant", "content": full_output})
-            SESSION_HISTORY[session_id] = SESSION_HISTORY[session_id][-20:]
-
-            # 发送结束标记
-            yield "data: [DONE]\n\n"
-
+                
+                print(f"文生图响应: {result}")
+                
+                if hasattr(result, 'output') and result.output is not None:
+                    output = result.output
+                    if hasattr(output, 'results') and output.results:
+                        for res in output.results:
+                            if hasattr(res, 'url') and res.url:
+                                print(f"生成图片 {i+1}: {res.url}")
+                                # 下载图片到本地
+                                local_path = self._download_image(res.url, static_dir)
+                                if local_path:
+                                    # 返回可访问的URL路径
+                                    image_urls.append(f"/static/images/{os.path.basename(local_path)}")
+                                    print(f"图片 {i+1} 已保存: {local_path}")
+                                break
+                    elif hasattr(output, 'url') and output.url:
+                        print(f"生成图片 {i+1}: {output.url}")
+                        local_path = self._download_image(output.url, static_dir)
+                        if local_path:
+                            image_urls.append(f"/static/images/{os.path.basename(local_path)}")
+                            print(f"图片 {i+1} 已保存: {local_path}")
+            
+            print(f"文生图完成，共生成 {len(image_urls)} 张图片")
+            return image_urls
+            
         except Exception as e:
-            error_msg = f"处理请求时出错: {str(e)}"
-            data = json.dumps({"type": "error", "data": error_msg}, ensure_ascii=False)
-            yield f"data: {data}\n\n"
-            yield "data: [DONE]\n\n"
+            print(f"文生图异常: {type(e).__name__}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return []
+    
+    def _download_image(self, url: str, save_dir: str) -> str:
+        """
+        下载图片到本地目录
+        
+        Args:
+            url: 图片URL
+            save_dir: 保存目录
+            
+        Returns:
+            本地文件路径或空字符串
+        """
+        try:
+            import uuid
+            # 生成唯一文件名
+            filename = f"{uuid.uuid4()}.png"
+            filepath = os.path.join(save_dir, filename)
+            
+            # 下载图片
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            
+            # 保存图片
+            with open(filepath, 'wb') as f:
+                f.write(response.content)
+            
+            return filepath
+            
+        except Exception as e:
+            print(f"下载图片失败: {str(e)}")
+            return ""
 
-    def chat(self, user_input: str, session_id: str = "default", user_id: str = "default_user") -> str:
+    def _build_image_prompt(self, output: str, advice: Optional[dict] = None) -> str:
+        """
+        根据对话输出构建文生图提示词
+        
+        Args:
+            output: 对话输出文本
+            advice: 结构化穿搭建议
+            
+        Returns:
+            图片生成提示词
+        """
+        if advice:
+            # 使用结构化建议构建更精确的提示词
+            style = advice.get("style", "时尚")
+            occasion = advice.get("occasion", "日常")
+            
+            clothing_items = []
+            if advice.get("tops"):
+                for item in advice["tops"]:
+                    clothing_items.append(f"{item.get('color', '')}{item.get('name', '')}")
+            if advice.get("bottoms"):
+                for item in advice["bottoms"]:
+                    clothing_items.append(f"{item.get('color', '')}{item.get('name', '')}")
+            if advice.get("outerwear"):
+                for item in advice["outerwear"]:
+                    clothing_items.append(f"{item.get('color', '')}{item.get('name', '')}")
+            
+            clothing_str = ", ".join(clothing_items)
+            
+            return f"时尚穿搭，{style}风格，适合{occasion}场合，穿着{clothing_str}的年轻女性，全身照，高清，时尚杂志风格"
+        else:
+            # 使用对话文本生成提示词
+            return f"时尚穿搭建议，{output[:100]}，高清，时尚风格，全身人像"
+
+    def _extract_structured_advice(self, output: str) -> Optional[dict]:
+        """
+        尝试从 LLM 输出中提取结构化穿搭建议
+        
+        Args:
+            output: LLM 输出文本
+            
+        Returns:
+            结构化建议字典或 None
+        """
+        try:
+            # 尝试查找 JSON 格式的建议
+            if "```json" in output:
+                json_start = output.find("```json") + 7
+                json_end = output.find("```", json_start)
+                if json_end != -1:
+                    json_str = output[json_start:json_end].strip()
+                    return json.loads(json_str)
+            
+            # 尝试查找普通 JSON
+            if "{" in output and "}" in output:
+                json_start = output.find("{")
+                json_end = output.rfind("}") + 1
+                json_str = output[json_start:json_end]
+                return json.loads(json_str)
+        except Exception as e:
+            print(f"解析结构化建议失败: {str(e)}")
+        
+        return None
+
+    def chat(self, user_input: str, session_id: str = "default", user_id: str = "default_user") -> Dict[str, Any]:
         """
         非流式对话接口
         
@@ -394,7 +464,7 @@ class StyleMateAgent:
             user_id: 用户ID（用于偏好存储）
             
         Returns:
-            回复内容
+            包含 message, images, advice 的字典
         """
         # 从输入中提取并更新用户偏好
         self._extract_preferences_from_input(user_input, user_id)
@@ -424,14 +494,44 @@ class StyleMateAgent:
         
         output = result.get("output", "")
         
+        # 尝试提取结构化建议
+        advice = self._extract_structured_advice(output)
+        
+        # 生成图片（如果有穿搭建议）
+        images = []
+        if advice or "穿搭" in output or "衣服" in output or "搭配" in output:
+            image_prompt = self._build_image_prompt(output, advice)
+            images = self._generate_images(image_prompt, num_images=3)
+        
         # 保存对话历史
         if session_id not in SESSION_HISTORY:
             SESSION_HISTORY[session_id] = []
         SESSION_HISTORY[session_id].append({"role": "human", "content": user_input})
-        SESSION_HISTORY[session_id].append({"role": "assistant", "content": output})
+        SESSION_HISTORY[session_id].append({
+            "role": "assistant", 
+            "content": output,
+            "images": images,
+            "advice": advice
+        })
         SESSION_HISTORY[session_id] = SESSION_HISTORY[session_id][-20:]
         
-        return output
+        return {
+            "message": output,
+            "images": images,
+            "advice": advice
+        }
+
+    def get_session_history(self, session_id: str) -> List[Dict]:
+        """
+        获取会话历史
+        
+        Args:
+            session_id: 会话ID
+            
+        Returns:
+            消息列表
+        """
+        return SESSION_HISTORY.get(session_id, [])
 
     def get_user_profile(self, user_id: str) -> Optional[UserFashionProfile]:
         """

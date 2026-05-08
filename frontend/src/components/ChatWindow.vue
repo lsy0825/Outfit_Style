@@ -25,26 +25,73 @@
         class="message-item"
         :class="msg.role"
       >
-        <div class="message-avatar">
-          <el-avatar v-if="msg.role === 'user'" :size="40">
-            <el-icon><User /></el-icon>
-          </el-avatar>
-          <el-avatar v-else :size="40" style="background-color: #409eff">
-            <el-icon><MagicStick /></el-icon>
-          </el-avatar>
+        <!-- 用户消息 -->
+        <div v-if="msg.role === 'user'" class="user-message">
+          <div class="message-avatar">
+            <el-avatar :size="40">
+              <el-icon><User /></el-icon>
+            </el-avatar>
+          </div>
+          <div class="message-content">
+            <div class="message-role">你</div>
+            <div class="message-text">{{ msg.content }}</div>
+          </div>
         </div>
-        <div class="message-content">
-          <div class="message-role">
-            {{ msg.role === 'user' ? '你' : 'StyleMate' }}
+
+        <!-- 助手消息 - 左右布局 -->
+        <div v-else class="assistant-message">
+          <div class="message-left">
+            <div class="message-avatar">
+              <el-avatar :size="40" style="background-color: #409eff">
+                <el-icon><MagicStick /></el-icon>
+              </el-avatar>
+            </div>
+            <div class="message-content">
+              <div class="message-role">StyleMate</div>
+              <div class="message-text">{{ msg.content }}</div>
+              <!-- 穿搭建议卡片 -->
+              <ClothingCard
+                v-if="msg.advice"
+                :advice="msg.advice"
+              />
+            </div>
           </div>
-          <div class="message-text">
-            {{ msg.content }}{{ msg.isStreaming ? '▌' : '' }}
+          <!-- 右侧图片展示 -->
+          <div v-if="msg.images && msg.images.length > 0" class="message-right">
+            <div class="image-gallery">
+              <div class="gallery-title">
+                <el-icon><Picture /></el-icon>
+                <span>穿搭参考</span>
+                <span class="gallery-hint">（点击可放大查看）</span>
+              </div>
+              <div class="image-grid">
+                <el-image
+                  v-for="(img, index) in msg.images"
+                  :key="img"
+                  :src="img"
+                  :alt="`穿搭参考 ${index + 1}`"
+                  :preview-src-list="msg.images"
+                  :initial-index="index"
+                  fit="cover"
+                  class="image-item"
+                  @click.stop
+                >
+                  <template #placeholder>
+                    <div class="image-placeholder">
+                      <el-icon class="is-loading"><Loading /></el-icon>
+                      <span>图片加载中...</span>
+                    </div>
+                  </template>
+                  <template #error>
+                    <div class="image-error">
+                      <el-icon><Picture /></el-icon>
+                      <span>加载失败</span>
+                    </div>
+                  </template>
+                </el-image>
+              </div>
+            </div>
           </div>
-          <!-- 穿搭建议卡片 -->
-          <ClothingCard
-            v-if="msg.advice && msg.role === 'assistant'"
-            :advice="msg.advice"
-          />
         </div>
       </div>
 
@@ -80,8 +127,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue'
-import { User, MagicStick, Loading, Promotion } from '@element-plus/icons-vue'
+import { ref, nextTick } from 'vue'
+import { User, MagicStick, Loading, Promotion, Picture } from '@element-plus/icons-vue'
 import { useChatStore } from '@/stores/chat'
 import { sendChatMessage } from '@/api/chat'
 import ClothingCard from './ClothingCard.vue'
@@ -115,52 +162,19 @@ async function handleSend(message: string) {
   chatStore.sendMessage(msg)
   scrollToBottom()
 
-  // 创建助手消息占位
-  const assistantMsg = chatStore.addAssistantMessage('', undefined)
-  assistantMsg.isStreaming = true
-  let currentContent = ''
-
-  // 发送消息并处理流式响应
-  await sendChatMessage(
-    msg,
-    chatStore.currentSessionId,
-    (chunk: string) => {
-      currentContent += chunk
-      chatStore.updateMessageContent(assistantMsg.id, currentContent)
-      scrollToBottom()
-    },
-    (fullMessage: string, advice?: any) => {
-      chatStore.updateMessageContent(assistantMsg.id, fullMessage)
-      // 更新 advice
-      const session = chatStore.currentSession
-      if (session) {
-        const msg = session.messages.find(m => m.id === assistantMsg.id)
-        if (msg && advice) {
-          msg.advice = advice as ClothingAdvice
-          msg.isStreaming = false
-        }
-      }
-      chatStore.isLoading = false
-      scrollToBottom()
-    },
-    (error: string) => {
-      chatStore.updateMessageContent(assistantMsg.id, `抱歉，出错了：${error}`)
-      const session = chatStore.currentSession
-      if (session) {
-        const msg = session.messages.find(m => m.id === assistantMsg.id)
-        if (msg) {
-          msg.isStreaming = false
-        }
-      }
-      chatStore.isLoading = false
-      scrollToBottom()
-    }
-  )
+  try {
+    // 发送消息并处理非流式响应
+    const response = await sendChatMessage(msg, chatStore.currentSessionId)
+    
+    // 添加助手消息（包含文本和图片）
+    chatStore.addAssistantMessage(response.message, response.images, response.advice)
+    scrollToBottom()
+  } catch (error) {
+    // 添加错误消息
+    chatStore.addAssistantMessage(`抱歉，出错了：${error instanceof Error ? error.message : '未知错误'}`, [])
+    scrollToBottom()
+  }
 }
-
-onMounted(() => {
-  // 初始化
-})
 </script>
 
 <style scoped>
@@ -196,31 +210,49 @@ onMounted(() => {
   margin-top: 20px;
 }
 
-.message-item {
+/* 用户消息样式 */
+.user-message {
   display: flex;
   gap: 12px;
   margin-bottom: 20px;
-}
-
-.message-item.user {
   flex-direction: row-reverse;
 }
 
-.message-avatar {
-  flex-shrink: 0;
+.user-message .message-content {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background-color: #409eff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.message-content {
-  max-width: 70%;
+.user-message .message-role {
+  font-size: 12px;
+  color: #e0e0e0;
+  margin-bottom: 4px;
+}
+
+/* 助手消息样式 - 左右布局 */
+.assistant-message {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.message-left {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+}
+
+.message-left .message-content {
+  flex: 1;
+  max-width: 100%;
   padding: 12px 16px;
   border-radius: 12px;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.message-item.user .message-content {
-  background-color: #409eff;
-  color: white;
 }
 
 .message-role {
@@ -229,13 +261,81 @@ onMounted(() => {
   margin-bottom: 4px;
 }
 
-.message-item.user .message-role {
-  color: #e0e0e0;
-}
-
 .message-text {
   line-height: 1.6;
   white-space: pre-wrap;
+}
+
+.message-avatar {
+  flex-shrink: 0;
+}
+
+/* 右侧图片区域 */
+.message-right {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.image-gallery {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.gallery-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #67c23a;
+  color: white;
+  font-weight: 500;
+}
+
+.gallery-hint {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-left: auto;
+}
+
+.image-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.image-item {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  height: 200px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.image-item:hover {
+  transform: scale(1.02);
+}
+
+.image-placeholder,
+.image-error {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f7fa;
+  color: #909399;
+  gap: 8px;
+}
+
+.image-placeholder .el-icon,
+.image-error .el-icon {
+  font-size: 24px;
 }
 
 .loading-indicator {

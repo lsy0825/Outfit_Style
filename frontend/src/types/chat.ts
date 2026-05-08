@@ -12,6 +12,7 @@ export interface ChatMessage {
   content: string
   timestamp: number
   advice?: ClothingAdvice // 结构化穿搭建议
+  images: string[] // 文生图返回的图片URL列表
   isStreaming?: boolean // 是否正在流式输出
 }
 
@@ -45,10 +46,11 @@ export interface ClothingAdvice {
 
 // API 响应类型
 export interface ChatResponse {
-  type: 'start' | 'text_chunk' | 'text' | 'structured' | 'error' | 'end' | 'done'
-  session_id?: string
-  data?: string | ClothingAdvice
-  message?: string
+  session_id: string
+  user_id: string
+  message: string
+  images: string[]
+  advice?: ClothingAdvice
 }
 
 // 会话

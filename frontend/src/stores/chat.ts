@@ -36,7 +36,8 @@ function sendMessage(content: string) {
       id: `msg_user_${Date.now()}_${++messageIdCounter}`,
       role: 'user',
       content,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      images: []
     }
 
     let session = currentSession.value
@@ -52,12 +53,13 @@ function sendMessage(content: string) {
     return userMessage
   }
 
-  function addAssistantMessage(content: string, advice?: any) {
+  function addAssistantMessage(content: string, images: string[] = [], advice?: any) {
     const assistantMessage: ChatMessage = {
       id: `msg_assistant_${Date.now()}_${++messageIdCounter}`,
       role: 'assistant',
       content,
       timestamp: Date.now(),
+      images,
       advice
     }
 

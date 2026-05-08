@@ -4,6 +4,8 @@ StyleMate - 基于实时天气与场景的穿搭推荐助手
 """
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import os
 from contextlib import asynccontextmanager
 import uvicorn
 
@@ -73,6 +75,11 @@ app.add_middleware(
 # 注册路由
 app.include_router(chat_router, prefix="/v1")
 app.include_router(health_router, prefix="/v1")
+
+# 静态文件服务 - 用于提供生成的图片
+static_dir = os.path.join(os.path.dirname(__file__), 'static')
+os.makedirs(static_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/")
 async def root():
